@@ -16,13 +16,17 @@ module Moneta
       unless options[:skip_expires]
         @expiration = Moneta::Berkeley.new(:file => "#{file}_expiration", :skip_expires => true )
         self.extend(Expires)
-        #Extend specific Berkeley expiration because it can't store Time object.
-        #This specific extension convert Time into integer and then into string.
+        #
+        # specific Berkeley expiration fonctionality. Berkeley DB can't store Time object, only String.
+        #
         self.extend(BerkeleyExpires)
       end
     end
     
     module BerkeleyExpires
+      #
+      # This specific extension convert Time into integer and then into string.
+      #
       def check_expired(key)
         if @expiration[key] && Time.now > Time.at(@expiration[key].to_i)
           @expiration.delete(key)
